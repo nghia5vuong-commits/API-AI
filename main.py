@@ -5,16 +5,14 @@ import cv2
 import numpy as np
 
 # Khởi tạo ứng dụng FastAPI
-app = FastAPI(title="AI Utilities API", description="API tích hợp NLP và Computer Vision")
+app = FastAPI(title="AI Utilities API", description="API tích hợp Cảm xúc và Nhận diện khuôn mặt (Bản tối ưu)")
 
-# --- KHỞI TẠO CÁC MÔ HÌNH AI (Sẽ tốn chút thời gian tải model ở lần chạy đầu tiên) ---
-print("Đang tải mô hình Phân tích cảm xúc...")
-# sentiment_model = pipeline("sentiment-analysis")
+# --- KHỞI TẠO CÁC MÔ HÌNH AI (Tối ưu cho Server Free 512MB) ---
+print("Đang tải mô hình Phân tích cảm xúc (Bản nhẹ)...")
+# Mô hình này tốn khoảng ~250MB RAM, vừa khít gói miễn phí
+sentiment_model = pipeline("sentiment-analysis")
 
-print("Đang tải mô hình Tóm tắt văn bản...")
-summarize_model = pipeline("summarization")
-
-# Tải file Haar Cascade của OpenCV để nhận diện khuôn mặt
+# Tải file Haar Cascade của OpenCV để nhận diện khuôn mặt (Rất nhẹ, chỉ vài MB)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # --- ĐỊNH NGHĨA DỮ LIỆU ĐẦU VÀO ---
@@ -35,19 +33,7 @@ async def analyze_sentiment(req: TextRequest):
     }
 
 # ==========================================
-# 2. API Tóm tắt văn bản (Text Summarization)
-# ==========================================
-@app.post("/api/summarize")
-async def summarize_text(req: TextRequest):
-    # Giới hạn độ dài bản tóm tắt từ 10 đến 50 từ
-    result = summarize_model(req.text, max_length=50, min_length=10, do_sample=False)
-    return {
-        "original_length": len(req.text),
-        "summary": result[0]['summary_text']
-    }
-
-# ==========================================
-# 3. API Nhận diện khuôn mặt (Face Detection)
+# 2. API Nhận diện khuôn mặt (Face Detection)
 # ==========================================
 @app.post("/api/detect-faces")
 async def detect_faces(file: UploadFile = File(...)):
