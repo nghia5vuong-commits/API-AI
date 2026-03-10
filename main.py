@@ -3,9 +3,21 @@ from pydantic import BaseModel
 from transformers import pipeline
 import cv2
 import numpy as np
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # Khởi tạo ứng dụng FastAPI
 app = FastAPI(title="AI Utilities API", description="API tích hợp Cảm xúc và Nhận diện khuôn mặt (Bản tối ưu)")
+
+
+# THÊM ĐOẠN NÀY ĐỂ MỞ KHÓA BẢO MẬT GIAO DIỆN
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Cho phép mọi trang web gọi vào
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- KHỞI TẠO CÁC MÔ HÌNH AI (Tối ưu cho Server Free 512MB) ---
 print("Đang tải mô hình Phân tích cảm xúc (Bản nhẹ)...")
@@ -18,6 +30,9 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 # --- ĐỊNH NGHĨA DỮ LIỆU ĐẦU VÀO ---
 class TextRequest(BaseModel):
     text: str
+
+
+
 
 # ==========================================
 # 1. API Phân tích cảm xúc (Sentiment Analysis)
